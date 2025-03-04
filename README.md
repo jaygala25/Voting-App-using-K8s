@@ -4,8 +4,6 @@
 
 Welcome to the Demo Voting Application, a distributed application deployed on Kubernetes that allows users to cast votes and view real-time results. This application demonstrates the power of container orchestration, microservices architecture, and scalable deployment using Kubernetes. It consists of multiple components, including a voting interface, a result interface, a worker, a Redis database for temporary storage, and a PostgreSQL database for persistent storage.
 
-This README provides an overview of the application, its architecture, deployment instructions, and guidelines for running and contributing to the project.
-
 ---
 
 ## Table of Contents
@@ -23,21 +21,92 @@ This README provides an overview of the application, its architecture, deploymen
 
 ## Architecture
 
-The Demo Voting Application is deployed in a Kubernetes namespace called `vote`. It follows a microservices-based architecture with the following components:
+The Demo Voting Application is deployed in a Kubernetes namespace called `vote`. It follows a microservices-based architecture that showcases the interaction between different services and deployments:
 
-- **Voting User Interface**: Where users cast their votes.
-- **Result User Interface**: Displays real-time voting results.
-- **Voting Service**: Exposes the voting interface to users.
-- **Result Service**: Exposes the result interface to users.
-- **Worker**: Processes votes and updates the databases.
-- **Redis**: An in-memory data store for temporary vote storage and inter-component communication.
-- **PostgreSQL**: A persistent database for storing final vote results.
+![Screenshot 2025-03-04 at 2 51 09 PM](https://github.com/user-attachments/assets/fd1368e8-8ab0-4cea-ab73-921a59943e4b)
 
-The architecture can be visualized as follows:
+### Detailed Component Interactions
 
-![Screenshot 2025-03-04 at 2 51 09 PM](https://github.com/user-attachments/assets/879f7426-8fde-4984-a218-919418889733)
+1. **Voting Users**
+   - External users interact with the application through the voting interface
+   - Connects to the `vote-service`, which routes requests to the `vote-deployment`
+   - Allows users to cast their vote between Cats and Dogs
 
-This diagram illustrates the data flow and interactions between components, with services exposed via NodePorts and deployments managed by Kubernetes.
+2. **Vote Service (`vote-service`)**
+   - A Kubernetes service that exposes the voting interface
+   - Acts as a load balancer for the voting application pods
+   - Enables external access to the voting interface via NodePort
+   - Routes incoming traffic to the `vote-deployment`
+
+3. **Vote Deployment (`vote-deployment`)**
+   - Manages the pods running the voting application
+   - Ensures the specified number of replicas are running
+   - Contains the frontend logic for the voting interface
+
+4. **Redis Service and Deployment (`redis-service` and `redis-deployment`)**
+   - Provides a temporary data storage solution
+   - Stores incoming votes before they are processed
+   - Facilitates communication between the voting interface and the worker
+
+5. **Worker Deployment (`worker-deployment`)**
+   - Background process that:
+     - Retrieves votes from Redis
+     - Processes and transforms vote data
+     - Writes processed votes to the PostgreSQL database
+   - Acts as a bridge between the voting interface and the persistent database
+
+6. **User Result Check**
+   - Users can view real-time voting results
+   - Connects to the `result-service`
+
+7. **Result Service (`result-service`)**
+   - Exposes the results interface
+   - Routes requests to the `result-deployment`
+   - Enables external access to voting results
+
+8. **Result Deployment (`result-deployment`)**
+   - Manages pods displaying voting results
+   - Retrieves and displays vote counts from the database
+
+9. **Database Service and Deployment (`db-service` and `db-deployment`)**
+   - Persistent storage for final vote results
+   - Uses PostgreSQL to store the aggregated voting data
+   - Provides a permanent record of votes processed by the worker
+
+### Data Flow
+1. User casts a vote through the voting interface
+2. Vote is temporarily stored in Redis
+3. Worker processes the vote from Redis
+4. Processed vote is written to PostgreSQL
+5. Result interface fetches and displays votes from the database
+
+---
+
+## Application User Interface
+
+### Voting Interface
+Users can cast their vote between Cats and Dogs:
+
+![Screenshot 2025-03-04 at 2 38 44 PM](https://github.com/user-attachments/assets/1afdabe8-5900-4b40-87e3-503cfeca5d47)
+
+### Real-time Results
+The results are updated in real-time:
+
+![Screenshot 2025-03-04 at 2 38 52 PM](https://github.com/user-attachments/assets/be11e491-8e4a-46e9-bbe9-a61db2db018b)
+
+---
+
+## Kubernetes Deployment Status
+
+### Deployment and Pod Status
+The application can be verified using `kubectl`:
+
+<img width="905" alt="Screenshot 2025-03-04 at 2 41 11 PM" src="https://github.com/user-attachments/assets/18b421fe-e2b2-41f8-bfd5-275db4a4a751" />
+
+Key observations:
+- All deployments are READY and AVAILABLE
+- Pods are in 'Running' status
+- No restart issues detected
 
 ---
 
@@ -110,9 +179,9 @@ All components are labeled with `app: demo-voting-app` and organized under the `
 
 Before deploying the Demo Voting Application, ensure you have:
 
-- **Kubernetes Cluster**: A running cluster (e.g., Minikube, Kind, or a cloud provider like GKE, EKS, or AKS).
-- **kubectl**: Installed and configured to communicate with your cluster.
-- **Docker**: Installed (optional, for building custom images locally).
+- **Kubernetes Cluster**: A running cluster (e.g., Minikube, Kind, or a cloud provider like GKE, EKS, or AKS)
+- **kubectl**: Installed and configured to communicate with your cluster
+- **Docker**: Installed (optional, for building custom images locally)
 
 ---
 
@@ -163,11 +232,11 @@ After deployment, access the application via NodePorts:
 
 - **Voting Interface**:
   - URL: `http://<node-ip>:30004`
-  - Cast votes here.
+  - Cast votes here
 
 - **Result Interface**:
   - URL: `http://<node-ip>:30005`
-  - View real-time results.
+  - View real-time results
 
 Replace `<node-ip>` with your Kubernetes node's IP address.
 
@@ -192,10 +261,10 @@ kubectl scale deployment voting-app-deploy --replicas=3 -n vote
 
 We welcome contributions! To get started:
 
-1. Fork the repository.
-2. Create a branch for your feature or fix.
-3. Commit your changes with clear messages.
-4. Push your branch and submit a pull request.
+1. Fork the repository
+2. Create a branch for your feature or fix
+3. Commit your changes with clear messages
+4. Push your branch and submit a pull request
 
 Follow Kubernetes best practices and include tests where applicable.
 
@@ -207,4 +276,4 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 ---
 
-This README offers a complete guide to understanding, deploying, and managing the Demo Voting Application on Kubernetes, based on the provided architecture and manifests. Enjoy exploring this demo!
+This README offers a complete guide to understanding, deploying, and managing the Demo Voting Application on Kubernetes. Enjoy exploring this demo!
