@@ -35,14 +35,7 @@ The Demo Voting Application is deployed in a Kubernetes namespace called `vote`.
 
 The architecture can be visualized as follows:
 
-```
-[Diagram: Voting Application Architecture]
-- Namespace: `vote`
-- Voting User -> Voting Service (NodePort: 30004) -> Voting Deployment
-- Result User -> Result Service (NodePort: 30005) -> Result Deployment
-- Voting Deployment <-> Redis Service <-> Redis Deployment
-- Voting Deployment <-> Worker Deployment <-> PostgreSQL Service <-> PostgreSQL Deployment
-```
+![Screenshot 2025-03-04 at 2 51 09 PM](https://github.com/user-attachments/assets/879f7426-8fde-4984-a218-919418889733)
 
 This diagram illustrates the data flow and interactions between components, with services exposed via NodePorts and deployments managed by Kubernetes.
 
